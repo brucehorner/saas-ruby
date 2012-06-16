@@ -7,12 +7,23 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @orderby=params[:orderby]
+    @orderby=params[:orderby] || 'title'
+    @ratings=params[:ratings] || {}
+    puts "First level ratings is '#{@ratings.keys}', order is '#{@orderby}'"
     if @orderby
-      @movies=Movie.order(@orderby).all
+      if @ratings.size>0
+        @movies=Movie.order(@orderby).find_all_by_rating @ratings.keys
+      elsif
+        @movies=Movie.order(@orderby).all
+      end
     elsif
-      @movies=Movie.all
+      if @ratings.size==0
+        @movies=Movie.all
+      elsif
+        @movies=Movie.all
+      end
     end
+    @all_ratings = Movie.all_ratings
   end
 
   def new
