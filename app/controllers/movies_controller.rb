@@ -7,20 +7,30 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @orderby=params[:orderby] || 'title'
-    @ratings=params[:ratings] || {}
+    @orderby=params[:orderby] || session[:orderby] || 'title'
+    @ratings=params[:ratings] || session[:ratings] || {}
     puts "First level ratings is '#{@ratings.keys}', order is '#{@orderby}'"
+    
+    if params[:orderby] != session[:orderby]
+      session[:orderby] = @orderby
+      flash.keep
+      redirect_to :orderby=>@orderby, :ratings=>@ratings
+      return
+    end
+    
+    if params[:ratings] != session[:ratings] and @ratings!={}
+      session[:orderby] = @orderby
+      session[:ratings] = @ratings
+      flash.keep
+      redirect_to :orderby=>@orderby, :ratings=>@ratings
+      return
+    end
+    
     if @orderby
       if @ratings.size>0
         @movies=Movie.order(@orderby).find_all_by_rating @ratings.keys
       elsif
         @movies=Movie.order(@orderby).all
-      end
-    elsif
-      if @ratings.size==0
-        @movies=Movie.all
-      elsif
-        @movies=Movie.all
       end
     end
     @all_ratings = Movie.all_ratings
